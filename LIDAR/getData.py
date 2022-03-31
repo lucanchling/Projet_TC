@@ -1,12 +1,10 @@
-#!/usr/bin/env python3
-'''Records scans to a given file in the form of numpy array.
-Usage example:
-
-$ ./record_scans.py out.npy'''
+from multiprocessing.connection import wait
 import sys
 import numpy as np
 from rplidar import RPLidar,RPLidarException
-
+import matplotlib.pyplot as plt
+from math import cos,sin,pi
+import time
 PORT_NAME = '/dev/ttyUSB0'
 
 def run(path):
@@ -22,31 +20,37 @@ def run(path):
     lidar.stop()
     lidar.disconnect()
     np.save(path, np.array(data))
-    
-def AccessData(Data,NumMes):
-    '''
-    Permet de récupérer les données pour l'angle & la distance d'une certaine mesure
-    Présentation : [[Angle],[Distance]]
-    '''
-    Angles = [Data[NumMes][i][1] for i in range(len(Data[0]))]   # Liste des Angles
-    Distances = [Data[NumMes][i][2] for i in range(len(Data[0]))]    # Liste des distances
-    return [Angles,Distances]
+
 
 #run('./examples/data')
 lidar = RPLidar(PORT_NAME)
 data = []
-try:
-    for i, scan in enumerate(lidar.iter_scans()):
-        print('%d: Got %d measures' % (i, len(scan)))
-        data.append(scan)
-        if i > 0:
-            break
-    #print(data)
-    print(AccessData(data,0))
-
-except ValueError:
-    print('Issue : Value Error')
-except RPLidarException:
-    print('Issue : RPlidar Error')
+#try:
+for i, scan in enumerate(lidar.iter_scans('express')):
+    print('%d: Got %d measures' % (i, len(scan)))
+    data.append([[scan[j][1] for j in range(len(scan))],[scan[j][2] for j in range(len(scan))]])
+    Angle = data[i][0]
+    Distance = data[i][1]
+    X = [Distance[i]*cos(Angle[i]*pi/180) for i in range(len(scan))]
+    Y = [Distance[i]*sin(Angle[i]*pi/180) for i in range(len(scan))]
+    # plt.figure()
+    # plt.scatter(X,Y)
+    # #plt.show()
+    # plt.ion()
+    # plt.draw()
+    # plt.pause(1)
+    # X,Y,Angle,Distance = [],[],[],[]
+    #plt.close()
+    
+    if i == 50:
+       break
+   
+with open('datalidar.txt','w') as f:
+        f.writelines(["%s\n" % item  for item in data])
+        f.close()
+# except ValueError:
+#     print('Issue : Value Error')
+# except RPLidarException:
+#     print('Issue : RPlidar Error')
 
 
