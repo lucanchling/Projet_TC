@@ -24,4 +24,5 @@ second = [v[1] for v in data]
 # Partie Affichage des données 
 plt.figure()
 plt.plot(first,second)
+plt.title("Distance(Angle)")
 plt.show()
