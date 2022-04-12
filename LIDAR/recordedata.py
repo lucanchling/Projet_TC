@@ -1,6 +1,9 @@
+from ctypes import sizeof
 import matplotlib.pyplot as plt
 from math import cos,sin,pi
-plt.close()
+from data import data
+import numpy as np
+
 file = 'datalidar.txt' 
 
 # FOnction pour le jeu de data
@@ -66,27 +69,54 @@ def getdata():
 # Récupération & Traitement des données
 
 def axisminmax(data):
+
     plt.xlim([minx,maxx])
     plt.ylim([miny,maxy])
 
+# Première approche --> set de data pourri
+def run():
+
+    data = getdata()
 
 
+    for i in range(len(data)):
+        Angle = data[i][0]
+        Distance = data[i][1]
+        X = [Distance[i]*cos(Angle[i]*pi/180) for i in range(len(data[0][0]))]
+        Y = [Distance[i]*sin(Angle[i]*pi/180) for i in range(len(data[0][0]))]
+        
+        #plt.figure()
+        #plt.scatter(X,Y)
+        ##axisminmax(data)
+        #plt.ion()
+        #plt.draw()
+        #plt.pause(1)
+        #plt.close()
+        # X,Y,Angle,Distance = [],[],[],[]
+        
+    plt.close()
 
-data = getdata()
+def convert(scan):
+    '''Conversion de la data Lidar en coordonnées cartésiennes'''
+    Angle = [scan[j][1] for j in range(len(scan))]
+    Distance = [scan[j][2] for j in range(len(scan))]
+    
+    X = [Distance[i]*cos(Angle[i]*pi/180) for i in range(len(scan))]
+    Y = [Distance[i]*sin(Angle[i]*pi/180) for i in range(len(scan))]
+
+    return X,Y
+
+X,Y = convert(data)
+
+def construct(X,Y):
+    return 0
 
 
-for i in range(len(data)):
-    Angle = data[i][0]
-    Distance = data[i][1]
-    X = [Distance[i]*cos(Angle[i]*pi/180) for i in range(len(data[0][0]))]
-    Y = [Distance[i]*sin(Angle[i]*pi/180) for i in range(len(data[0][0]))]
+def affiche():
     plt.figure()
     plt.scatter(X,Y)
-    axisminmax(data)
-    plt.ion()
-    plt.draw()
-    plt.pause(3)
-    plt.close()
-    # X,Y,Angle,Distance = [],[],[],[]
-    
-plt.close()
+    plt.plot()
+    plt.axis('equal')
+    plt.show()
+
+#affiche()
